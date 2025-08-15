@@ -1,0 +1,251 @@
+Practica 1 
+
+1. Insertar un alumno mujer con dos materias y padre de apellido "Torres"
+db.alumnos.insertOne({
+  "nombres": "María",
+  "apellidos": "Torres",
+  "sexo": "F",
+  "casado": false,
+  "fecha_nacimiento": new Date("1999-03-15T10:30:00.000Z"),
+  "materias": ["MAT101", "FIS201"],
+  "padre": {
+    "nombre": "Roberto",
+    "apellido": "Torres"
+  }
+});
+
+2. Insertar cinco alumnos a la vez con datos variados
+db.alumnos.insertMany([
+  {
+    "nombres": "Ana",
+    "apellidos": "López García",
+    "sexo": "F",
+    "casado": true,
+    "fecha_nacimiento": new Date("1995-07-20T08:15:30.000Z"),
+    "materias": ["COM350", "SIS256", "MAT101"],
+    "padre": {
+      "nombre": "Luis",
+      "apellido": "López"
+    }
+  },
+  {
+    "nombres": "Carlos",
+    "apellidos": "Mendoza Silva",
+    "sexo": "M",
+    "casado": false,
+    "fecha_nacimiento": new Date("2000-12-10T14:45:22.000Z"),
+    "materias": ["SIS00", "FIS201"],
+    "padre": {
+      "nombre": "Miguel",
+      "apellido": "Mendoza"
+    }
+  },
+  {
+    "nombres": "Elena",
+    "apellidos": "Ruiz Morales",
+    "sexo": "F",
+    "casado": false,
+    "fecha_nacimiento": new Date("2001-05-08T11:20:15.000Z"),
+    "materias": ["COM350"],
+    "padre": {
+      "nombre": "Diego",
+      "apellido": "Ruiz"
+    }
+  },
+  {
+    "nombres": "Fernando",
+    "apellidos": "Castro Jiménez",
+    "sexo": "M",
+    "casado": true,
+    "fecha_nacimiento": new Date("1993-09-25T16:30:45.000Z"),
+    "materias": ["SIS256", "MAT101", "FIS201", "COM350"],
+    "padre": {
+      "nombre": "Juan",
+      "apellido": "Castro"
+    }
+  },
+  {
+    "nombres": "Isabel",
+    "apellidos": "Herrera Vega",
+    "sexo": "F",
+    "casado": false,
+    "fecha_nacimiento": new Date("2002-01-18T09:10:33.000Z"),
+    "materias": ["SIS00", "SIS256"],
+    "padre": {
+      "nombre": "Carlos",
+      "apellido": "Herrera"
+    }
+  }
+]);
+
+3. Insertar un alumno sin campo padre
+db.alumnos.insertOne({
+  "nombres": "Roberto",
+  "apellidos": "Sánchez Martín",
+  "sexo": "M",
+  "casado": false,
+  "fecha_nacimiento": new Date("1998-11-12T13:25:10.000Z"),
+  "materias": ["COM350", "SIS256"]
+});
+
+4. Insertar un alumno hombre casado, nacido en 1990
+db.alumnos.insertOne({
+  "nombres": "Alejandro",
+  "apellidos": "Ramírez González",
+  "sexo": "M",
+  "casado": true,
+  "fecha_nacimiento": new Date("1990-06-15T10:00:00.000Z"),
+  "materias": ["SIS256", "MAT101"],
+  "padre": {
+    "nombre": "José",
+    "apellido": "Ramírez"
+  }
+});
+
+5. Insertar un alumno con 4 materias y padre "Carlos Pérez"
+db.alumnos.insertOne({
+  "nombres": "Diego",
+  "apellidos": "Morales Castro",
+  "sexo": "M",
+  "casado": false,
+  "fecha_nacimiento": new Date("1999-04-22T15:30:20.000Z"),
+  "materias": ["COM350", "SIS256", "SIS00", "MAT101"],
+  "padre": {
+    "nombre": "Carlos",
+    "apellido": "Pérez"
+  }
+});
+
+6. Insertar un alumno solo con "COM350" como materia
+db.alumnos.insertOne({
+  "nombres": "Lucía",
+  "apellidos": "Torres Mendoza",
+  "sexo": "F",
+  "casado": false,
+  "fecha_nacimiento": new Date("2000-08-30T12:15:45.000Z"),
+  "materias": ["COM350"],
+  "padre": {
+    "nombre": "Antonio",
+    "apellido": "Torres"
+  }
+});
+
+
+
+7. Listar alumnos cuyo padre tenga nombre "Luis" o "Miguel"
+db.alumnos.find({
+  $or: [
+    { "padre.nombre": "Luis" },
+    { "padre.nombre": "Miguel" }
+  ]
+});
+
+8. Mostrar alumnos no casados que tengan "SIS256"
+db.alumnos.find({
+  "casado": false,
+  "materias": "SIS256"
+});
+
+9. Contar alumnos con más de 2 materias
+db.alumnos.countDocuments({
+  "materias.2": { $exists: true }
+});
+
+10. Mostrar los 10 más viejos con nombres y fecha_nacimiento
+db.alumnos.find(
+  {},
+  { "nombres": 1, "fecha_nacimiento": 1, "_id": 0 }
+).sort({ "fecha_nacimiento": 1 }).limit(10);
+
+11. Buscar alumnos con "COM350" y "SIS00"
+db.alumnos.find({
+  "materias": { $all: ["COM350", "SIS00"] }
+});
+
+12. Mostrar solo nombres y sexo de los alumnos mujeres
+db.alumnos.find(
+  { "sexo": "F" },
+  { "nombres": 1, "sexo": 1, "_id": 0 }
+);
+
+13. Ordenar todos los alumnos por apellido ascendente
+db.alumnos.find().sort({ "apellidos": 1 });
+
+14. Listar alumnos nacidos entre 1998 y 2003
+db.alumnos.find({
+  "fecha_nacimiento": {
+    $gte: new Date("1998-01-01T00:00:00.000Z"),
+    $lt: new Date("2004-01-01T00:00:00.000Z")
+  }
+});
+
+15. Mostrar alumnos cuyo apellido termine en "ez"
+db.alumnos.find({
+  "apellidos": { $regex: /ez$/, $options: "i" }
+});
+
+16. Contar alumnos casados y con "SIS258"
+db.alumnos.countDocuments({
+  "casado": true,
+  "materias": "SIS258"
+});
+
+
+
+17. Cambiar el nombre "Luis" por "Luis Alberto"
+db.alumnos.updateMany(
+  { "nombres": "Luis" },
+  { $set: { "nombres": "Luis Alberto" } }
+);
+
+18. Agregar "SIS777" a todos los alumnos con "COM350"
+db.alumnos.updateMany(
+  { "materias": "COM350" },
+  { $addToSet: { "materias": "SIS777" } }
+);
+
+19. Poner casado: false a todos los alumnos con menos de 2 materias
+db.alumnos.updateMany(
+  { "materias.1": { $exists: false } },
+  { $set: { "casado": false } }
+);
+
+20. Quitar "SIS256" de todos los que la tengan
+db.alumnos.updateMany(
+  { "materias": "SIS256" },
+  { $pull: { "materias": "SIS256" } }
+);
+
+21. Cambiar el nombre del padre "Juan" a "Juan José"
+db.alumnos.updateMany(
+  { "padre.nombre": "Juan" },
+  { $set: { "padre.nombre": "Juan José" } }
+);
+
+22. Agregar un campo activo: true a todos los documentos
+db.alumnos.updateMany(
+  {},
+  { $set: { "activo": true } }
+);
+
+
+23. Eliminar todos los alumnos hombres
+db.alumnos.deleteMany({ "sexo": "M" });
+
+24. Eliminar a quien tenga "SIS777" como materia
+db.alumnos.deleteMany({ "materias": "SIS777" });
+
+25. Eliminar a los alumnos cuyo padre tenga apellido "Ramírez"
+db.alumnos.deleteMany({ "padre.apellido": "Ramírez" });
+
+26. Eliminar a los que nacieron después de 2004
+db.alumnos.deleteMany({
+  "fecha_nacimiento": { $gte: new Date("2005-01-01T00:00:00.000Z") }
+});
+
+27. Eliminar todos los casados
+db.alumnos.deleteMany({ "casado": true });
+
+28. Eliminar al primer alumno que tenga "SIS258"
+db.alumnos.deleteOne({ "materias": "SIS258" });
+
