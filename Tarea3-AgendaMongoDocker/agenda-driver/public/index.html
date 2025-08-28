@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Contactos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Agenda de Contactos</h1>
+    
+    <div class="card mb-4">
+      <div class="card-header"><h5>Nuevo Contacto</h5></div>
+      <div class="card-body">
+        <form id="contactForm">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombres</label>
+              <input type="text" class="form-control" id="nombres" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" id="apellidos" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Fecha de Nacimiento</label>
+              <input type="date" class="form-control" id="fecha_nacimiento">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Celular</label>
+              <input type="text" class="form-control" id="celular">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Dirección</label>
+            <input type="text" class="form-control" id="direccion">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" class="form-control" id="correo">
+          </div>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary ms-2" id="cancelEdit" style="display:none;">Cancelar</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h5>Lista de Contactos</h5></div>
+      <div class="card-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nombres</th>
+              <th>Apellidos</th>
+              <th>Celular</th>
+              <th>Correo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="contactTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let editingId = null;
+    const API_URL = "/agenda";
+
+    document.addEventListener('DOMContentLoaded', loadContacts);
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const contacto = {
+        nombres: document.getElementById('nombres').value,
+        apellidos: document.getElementById('apellidos').value,
+        fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+        direccion: document.getElementById('direccion').value,
+        celular: document.getElementById('celular').value,
+        correo: document.getElementById('correo').value
+      };
+
+      try {
+        if (editingId) {
+          await fetch(`${API_URL}/${editingId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contacto)
+          });
+        } else {
+          await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contacto)
+          });
+        }
+        resetForm();
+        loadContacts();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Ocurrió un error al guardar el contacto');
+      }
+    });
+
+    document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+    async function loadContacts() {
+      try {
+        const res = await fetch(API_URL);
+        const contactos = await res.json();
+        renderContacts(contactos);
+      } catch (error) {
+        console.error('Error al cargar contactos:', error);
+      }
+    }
+
+    function renderContacts(contactos) {
+      const tableBody = document.getElementById('contactTable');
+      tableBody.innerHTML = '';
+      contactos.forEach(contacto => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${contacto.nombres}</td>
+          <td>${contacto.apellidos}</td>
+          <td>${contacto.celular || ''}</td>
+          <td>${contacto.correo || ''}</td>
+          <td>
+            <button class="btn btn-sm btn-warning me-2" onclick="editContact('${contacto._id}')">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteContact('${contacto._id}')">Eliminar</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    async function editContact(id) {
+      try {
+        const res = await fetch(`${API_URL}/${id}`);
+        const contacto = await res.json();
+        document.getElementById('nombres').value = contacto.nombres;
+        document.getElementById('apellidos').value = contacto.apellidos;
+        document.getElementById('fecha_nacimiento').value = contacto.fecha_nacimiento ? contacto.fecha_nacimiento.split("T")[0] : '';
+        document.getElementById('direccion').value = contacto.direccion || '';
+        document.getElementById('celular').value = contacto.celular || '';
+        document.getElementById('correo').value = contacto.correo || '';
+        document.getElementById('cancelEdit').style.display = 'inline-block';
+        editingId = id;
+      } catch (error) {
+        console.error('Error al editar contacto:', error);
+      }
+    }
+
+    async function deleteContact(id) {
+      if (confirm('¿Estás seguro de eliminar este contacto?')) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadContacts();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('contactForm').reset();
+      document.getElementById('cancelEdit').style.display = 'none';
+      editingId = null;
+    }
+
+    window.editContact = editContact;
+    window.deleteContact = deleteContact;
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/taskmanager
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - task-network
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=taskmanager
+    restart: unless-stopped
+    networks:
+      - task-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  task-network:
+    driver: bridge

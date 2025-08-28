@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Usuarios - Gestión de Usuarios</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 2rem;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .table th {
+            background-color: #495057;
+            color: white;
+            border: none;
+        }
+        .btn-delete {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section text-center">
+            <h1><i class="fas fa-users"></i> Sistema de Gestión de Usuarios</h1>
+            <p class="mb-0">Administra usuarios de manera fácil y eficiente</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-list"></i> Lista de Usuarios
+                        </h3>
+                        <a href="/agregar" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Agregar Usuario
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <% if (error) { %>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <% } %>
+                        
+                        <% if (usuarios.length === 0) { %>
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-5x text-muted mb-3"></i>
+                            <h4 class="text-muted">No hay usuarios registrados</h4>
+                            <p class="text-muted">Comienza agregando tu primer usuario</p>
+                            <a href="/agregar" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Agregar Primer Usuario
+                            </a>
+                        </div>
+                        <% } else { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">ID</th>
+                                        <th width="30%">Nombre</th>
+                                        <th width="35%">Correo Electrónico</th>
+                                        <th width="20%">Fecha de Registro</th>
+                                        <th width="5%">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% usuarios.forEach(function(usuario) { %>
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary"><%= usuario.id %></span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-user text-muted me-2"></i>
+                                            <%= usuario.nombre %>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-envelope text-muted me-2"></i>
+                                            <%= usuario.email %>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-calendar text-muted me-2"></i>
+                                            <%= new Date(usuario.fecha_registro).toLocaleString('es-ES', {
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) %>
+                                        </td>
+                                        <td>
+                                            <form method="POST" action="/usuarios/<%= usuario.id %>?_method=DELETE" class="d-inline" 
+                                                  onsubmit="return confirmarEliminacion('<%= usuario.nombre %>')">
+                                                <button type="submit" class="btn btn-danger btn-delete" title="Eliminar usuario">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="text-muted mb-0">
+                                        Total de usuarios: <strong><%= usuarios.length %></strong>
+                                    </p>
+                                </div>
+                                <div class="col-sm-6 text-end">
+                                    <small class="text-muted">
+                                        <i class="fas fa-sync-alt"></i> 
+                                        Actualizado: <%= new Date().toLocaleString('es-ES') %>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Confirmación antes de eliminar
+        function confirmarEliminacion(nombre) {
+            return confirm(`¿Estás seguro de que deseas eliminar al usuario "${nombre}"?`);
+        }
+    </script>
+</body>
+</html>

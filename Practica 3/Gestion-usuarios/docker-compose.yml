@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Aplicación Node.js
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql-db
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_NAME=usuarios_db
+    depends_on:
+      - mysql-db
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Base de datos MySQL
+  mysql-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=usuarios_db
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # PHPMyAdmin (opcional, para administrar la base de datos)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=mysql-db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql-db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
